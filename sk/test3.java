@@ -2,6 +2,9 @@ import java.lang.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class test3
 {
@@ -11,6 +14,8 @@ public class test3
         Random rand; 
         int num=0,size=0,timeOut=0;
         long seed = 0;
+        int mode = 0;
+        int nx,modx;
         if(args.length == 4)
         {
             num = Integer.parseInt(args[0]);
@@ -29,7 +34,7 @@ public class test3
             System.out.println("Wrong size!");
             System.exit(1); 
         }
-        if(num < 0)
+        if(num < 1)
         {
             System.out.println("Wrong numbers of threads!");
             System.exit(1); 
@@ -41,6 +46,7 @@ public class test3
             
         }
         //int[] ta = new int[size];
+        List <Integer> b;
         List <Integer> a = new ArrayList<>();
         rand = new Random(seed);
         
@@ -48,31 +54,77 @@ public class test3
         { 
             a.add(rand.nextInt(65535));
         }
-        System.out.println("--array:"+a);
-        mergeSortTest1 mst = new mergeSortTest1();
-        a = mst.sort(a);
-        System.out.println("--sorted:"+a);
-        //System.out.println(a.size()); 
-        //System.out.println("array"+a);
-        //int mid = size/2;
-        //List <Integer> x,y;
-        //x = a.subList(0,mid);
-        //y = a.subList(mid,(a.size()));
-        //for(i = 0; i < x.size(); i++)
-        //{
-        //    System.out.println(i+":"+x.get(i));
-        //} 
-        //for(i = 0; i < y.size(); i++)
-        //{
-        //    System.out.println(i+":"+y.get(i));
-        //} 
+        //------------------------------------------------
         
+        //System.out.println("--array:"+a);
+        mergeSortTest1 mst = new mergeSortTest1();
+        long startTime=System.nanoTime();
+        long mstime = System.currentTimeMillis();
+        //if(num == 1)
+        //{
+        //    a = mst.sort(a);
+        //    System.out.println("--sorted:"+a);
+        //}
+        //else
+        //{
+        //List <Integer> temp ;
+        if(num > size){num = size;}
+        nx = (size + num - 1)/num; 
+        List<Integer> temp[] = new List[num];
+        testThread1 []thrd = new testThread1[num];
+        for(i = 0; i < num -1 ; i ++)
+        {
+            //temp = a.subList(i*nx,i*nx+nx);
+            thrd[i] = new testThread1(i,a.subList(i*nx,i*nx+nx));
+            thrd[i].start();
+            
+        }
+        thrd[num-1] = new testThread1(num-1,a.subList((num-1)*nx,a.size())) ;
+        thrd[num-1].start();
+        for(i = 0; i < num ; i ++)
+        {
+            try
+            {
+                thrd[i].join(); 
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        for(i = 0; i < num  ; i ++)
+        {
+            temp[i] = thrd[i].a;
+        }
+        System.out.println("--sorted:");
+        b = mst.merge_lis(temp,0,num);
+        //}
+        startTime = System.nanoTime()-startTime;
+        mstime = System.currentTimeMillis()-mstime;
+        System.out.println("Time cost:"+startTime+"ns");
+        System.out.println("Time cost:"+mstime+"ms");
+        //-----------------------------------------------
     }
     
 }
 
 class mergeSortTest1
 {
+    public List merge_lis(List a[], int index, int block_size)
+    {
+        //List <Integer> x,y;
+        if(block_size == 1)
+        {
+            //x = a[index].a;
+            //System.out.println(a[index]);
+            return a[index];
+        }
+        else if(block_size > 1)
+        {
+             return merge(merge_lis(a,index, block_size/2),merge_lis(a, (index+block_size/2),  (block_size-block_size/2)));
+        }
+        else{return null;}
+    }
     public List merge(List a,List b)
     {
         int sza,szb,pa=0, pb=0;
@@ -82,15 +134,8 @@ class mergeSortTest1
         List <Integer> x = new ArrayList<>();
         while( pa< a.size() || pb< b.size() )
         {
-            //System.out.println("loop-----");
-            //System.out.println(a.size());
-            //System.out.println(b.size());
-            //System.out.println("-----1oop");
-            //System.out.println(b);
             if(a.size() == pa)
             {
-                
-                //System.out.println("1111");
                 while(b.size() != pb)
                 {
                     x.add((int)b.get(pb));
@@ -118,8 +163,6 @@ class mergeSortTest1
                 pb++;
             }
         }
-        //a = null;
-        //b = null;
         return x;
     }
     public List sort(List a)
@@ -136,56 +179,27 @@ class mergeSortTest1
         h1 = this.sort(h1);
         h2 = this.sort(h2);
         x = this.merge(h1,h2);
-        System.out.println(x); 
+        //System.out.println(x); 
         return x;
     }
 }
 
-class mergeSortTest2
-{
-    public int merge(int a[],int index1, int index2, int size1, int size2)
-    {
-        int p1;
-        int p2;
-        p1 = index1;
-        p2 = index2;
-        return 0;
-    }
-    //public List sort(int a[])
-    //{
-    //    //System.out.println(a.size()); 
-    //    if(a.size() < 2)
-    //    {
-    //        return a;
-    //    } 
-    //    List <Integer> h1,h2,x;
-    //    int mid;
-    //    mid = a.size()/2;
-    //    h1 = a.subList(0,mid);
-    //    h2 = a.subList(mid,(a.size()));
-    //    h1 = this.sort(h1);
-    //    h2 = this.sort(h2);
-    //    //System.out.println(h1); 
-    //    //System.out.println(h2); 
-    //    x = this.merge(h1,h2);
-    //    
-    //    //System.out.println(x); 
-    //    return x;
-    //}
-}
-class testThread extends Thread
+class testThread1 extends Thread
 {
     private int threadID;
-    List <Integer> a;
-    public testThread(int in, List a)
+    public List <Integer> a;
+    public testThread1(int in, List a)
     {
         this.threadID = in;
-        this.a = a
+        this.a = a;
     }
     public void run()
     {
         
-        //System.out.println("Hello world, I am thread "+ this.threadID);
+        //System.out.println("run");
+        mergeSortTest1 mst = new mergeSortTest1();
+        a = mst.sort(a);
+        //System.out.println(threadID+":"+a);
     }
 
 }
