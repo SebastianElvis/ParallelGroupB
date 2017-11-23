@@ -89,6 +89,16 @@ public class ConcurrentLinkedList<T> {
 		}
 	}
 	
+	public int size() {
+		int size = 0;
+		ConcurrentLinkedList<T> n = this;
+		while(n != null && n.elem != null) {
+			size++;
+			n = n.next.get();
+		}
+		return size;
+	}
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ConcurrentLinkedList<Integer> l = new ConcurrentLinkedList<Integer>();
@@ -101,6 +111,7 @@ public class ConcurrentLinkedList<T> {
 		System.out.println(l);
 		l.removeFirstElement();
 		System.out.println(l);
+		System.out.println(l.size());
 	}
 
 }
